@@ -26,8 +26,157 @@ noncomputable section
 
 namespace phd_core
 
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::RingItem}::value]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 12:4-14:5
+    Visibility: public -/
+def arithmetic.modulo.RingItem.value
+  (self : arithmetic.modulo.RingItem) : RustM Std.U64 := do
+  ok self
+
+/-- [phd_core::arithmetic::engine::ext_gcd::extended_gcd]: loop body 0:
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 44:4-52:5 -/
+@[rust_loop_body]
+def arithmetic.engine.ext_gcd.extended_gcd_loop.body
+  (a : Std.U64) (b : Std.U64) (x2 : Std.I128) (x1 : Std.I128) (y2 : Std.I128)
+  (y1 : Std.I128) :
+  RustM (ControlFlow (Std.U64 × Std.U64 × Std.I128 × Std.I128 × Std.I128 ×
+    Std.I128) (Std.U64 × Std.I128 × Std.I128))
+  := do
+  if b > 0#u64
+  then
+    let i ← a / b
+    let q ← core.I128.Insts.CoreConvertFromU64.from i
+    let r ← a % b
+    let i1 ← q * x1
+    let x ← x2 - i1
+    let i2 ← q * y1
+    let y ← y2 - i2
+    ok (cont (b, r, x1, x, y1, y))
+  else ok (done (a, x2, y2))
+
+/-- [phd_core::arithmetic::engine::ext_gcd::extended_gcd]: loop 0:
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 44:4-52:5 -/
+@[rust_loop]
+def arithmetic.engine.ext_gcd.extended_gcd_loop
+  (a : Std.U64) (b : Std.U64) (x2 : Std.I128) (x1 : Std.I128) (y2 : Std.I128)
+  (y1 : Std.I128) :
+  RustM (Std.U64 × Std.I128 × Std.I128)
+  := do
+  loop
+    (fun (a1, b1, x21, x11, y21, y11) =>
+      arithmetic.engine.ext_gcd.extended_gcd_loop.body a1 b1 x21 x11 y21 y11)
+    (a, b, x2, x1, y2, y1)
+
+/-- [phd_core::arithmetic::engine::ext_gcd::extended_gcd]:
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 34:0-55:1 -/
+def arithmetic.engine.ext_gcd.extended_gcd
+  (a : Std.U64) (b : Std.U64) : RustM (Std.U64 × Std.I128 × Std.I128) := do
+  if b = 0#u64
+  then ok (a, 1#i128, 0#i128)
+  else
+    arithmetic.engine.ext_gcd.extended_gcd_loop a b 1#i128 0#i128 0#i128 1#i128
+
+/-- [phd_core::arithmetic::engine::ext_gcd::{impl phd_core::arithmetic::modulo::ModularInverse<phd_core::arithmetic::errors::RingError> for phd_core::arithmetic::engine::ext_gcd::ExtGcd}::inverse]:
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 11:4-23:5
+    Visibility: public -/
+def
+  arithmetic.engine.ext_gcd.ExtGcd.Insts.Phd_coreArithmeticModuloModularInverseRingError.inverse
+  (self : arithmetic.engine.ext_gcd.ExtGcd) (item : arithmetic.modulo.RingItem)
+  (modulus : Std.U64) :
+  RustM (core.result.Result (core.option.Option Std.U64)
+    arithmetic.errors.RingError)
+  := do
+  if modulus = 0#u64
+  then ok (core.result.Result.Err arithmetic.errors.RingError.ZeroModulo)
+  else
+    let i ← arithmetic.modulo.RingItem.value item
+    let i1 ← i % modulus
+    let (gcd, _, coefficient) ←
+      arithmetic.engine.ext_gcd.extended_gcd modulus i1
+    if gcd != 1#u64
+    then ok (core.result.Result.Ok core.option.Option.None)
+    else
+      let i2 ← core.I128.Insts.CoreConvertFromU64.from modulus
+      let i3 ← core.num.I128.rem_euclid coefficient i2
+      let i4 ← lift (IScalar.hcast .U64 i3)
+      ok (core.result.Result.Ok (core.option.Option.Some i4))
+
+/-- Trait implementation: [phd_core::arithmetic::engine::ext_gcd::{impl phd_core::arithmetic::modulo::ModularInverse<phd_core::arithmetic::errors::RingError> for phd_core::arithmetic::engine::ext_gcd::ExtGcd}]
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 8:0-24:1 -/
+@[reducible]
+def
+  arithmetic.engine.ext_gcd.ExtGcd.Insts.Phd_coreArithmeticModuloModularInverseRingError
+  : arithmetic.modulo.ModularInverse arithmetic.engine.ext_gcd.ExtGcd
+  arithmetic.errors.RingError := {
+  inverse :=
+    arithmetic.engine.ext_gcd.ExtGcd.Insts.Phd_coreArithmeticModuloModularInverseRingError.inverse
+}
+
+/-- [phd_core::arithmetic::matrix::{phd_core::arithmetic::matrix::Matrix<T>}::rows]:
+    Source: 'crates/core/src/arithmetic/matrix.rs', lines 40:4-42:5 -/
+def arithmetic.matrix.Matrix.impl.rows
+  {T : Type} (self : arithmetic.matrix.Matrix T) : RustM Std.Usize := do
+  ok self.rows
+
+/-- [phd_core::arithmetic::linear_system::{phd_core::arithmetic::linear_system::LinearSystem<T>}::from]:
+    Source: 'crates/core/src/arithmetic/linear_system.rs', lines 15:4-24:5 -/
+def arithmetic.linear_system.LinearSystem.from
+  {T : Type} (coeffs : arithmetic.matrix.Matrix T) (rhs_vec : alloc.vec.Vec T)
+  :
+  RustM (core.result.Result (arithmetic.linear_system.LinearSystem T)
+    arithmetic.errors.LinearSystemError)
+  := do
+  let i ← arithmetic.matrix.Matrix.impl.rows coeffs
+  let i1 ← alloc.vec.Vec.len rhs_vec
+  if i != i1
+  then
+    ok (core.result.Result.Err
+      (arithmetic.errors.LinearSystemError.RhsLengthMismatch i i1))
+  else ok (core.result.Result.Ok { coeffs, rhs_vec })
+
+/-- [phd_core::arithmetic::matrix::{phd_core::arithmetic::matrix::Matrix<T>}::from]:
+    Source: 'crates/core/src/arithmetic/matrix.rs', lines 15:4-38:5 -/
+def arithmetic.matrix.Matrix.from
+  {T : Type} (rows : Std.Usize) (entries : alloc.vec.Vec T) :
+  RustM (core.result.Result (arithmetic.matrix.Matrix T)
+    arithmetic.errors.MatrixError)
+  := do
+  let i ← alloc.vec.Vec.len entries
+  let o ← core.num.Usize.checked_rem i rows
+  let r ← core.option.Option.ok_or o arithmetic.errors.MatrixError.ZeroRows
+  let cf ← core.result.Result.Insts.CoreOpsTry_traitTry.branch r
+  match cf with
+  | core.ops.control_flow.ControlFlow.Continue val =>
+    if val != 0#usize
+    then
+      ok (core.result.Result.Err (arithmetic.errors.MatrixError.UnevenRows rows
+        i))
+    else
+      let o1 ← core.num.Usize.checked_div i rows
+      let r1 ←
+        core.option.Option.ok_or o1 arithmetic.errors.MatrixError.ZeroRows
+      let cf1 ← core.result.Result.Insts.CoreOpsTry_traitTry.branch r1
+      match cf1 with
+      | core.ops.control_flow.ControlFlow.Continue val1 =>
+        ok (core.result.Result.Ok { rows, cols := val1, entries })
+      | core.ops.control_flow.ControlFlow.Break residual =>
+        core.result.Result.Insts.CoreOpsTry_traitFromResidualResultInfallibleE.from_residual
+          (arithmetic.matrix.Matrix T) (core.convert.From.Blanket
+          arithmetic.errors.MatrixError) residual
+  | core.ops.control_flow.ControlFlow.Break residual =>
+    core.result.Result.Insts.CoreOpsTry_traitFromResidualResultInfallibleE.from_residual
+      (arithmetic.matrix.Matrix T) (core.convert.From.Blanket
+      arithmetic.errors.MatrixError) residual
+
+/-- [phd_core::arithmetic::matrix::{phd_core::arithmetic::matrix::Matrix<T>}::cols]:
+    Source: 'crates/core/src/arithmetic/matrix.rs', lines 44:4-46:5 -/
+def arithmetic.matrix.Matrix.impl.cols
+  {T : Type} (self : arithmetic.matrix.Matrix T) : RustM Std.Usize := do
+  ok self.cols
+
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::new]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 12:4-18:5 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 31:4-37:5
+    Visibility: public -/
 def arithmetic.modulo.Ring.new
   (modulo : Std.U64) :
   RustM (core.result.Result arithmetic.modulo.Ring arithmetic.errors.RingError)
@@ -35,5 +184,142 @@ def arithmetic.modulo.Ring.new
   if modulo = 0#u64
   then ok (core.result.Result.Err arithmetic.errors.RingError.ZeroModulo)
   else ok (core.result.Result.Ok { modulo })
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::new_item]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 39:4-41:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.new_item
+  (self : arithmetic.modulo.Ring) (value : Std.U64) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  let i ← value % self.modulo
+  ok i
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::norm_item]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 43:4-45:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.norm_item
+  (self : arithmetic.modulo.Ring) (value : arithmetic.modulo.RingItem) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  let i ← value % self.modulo
+  ok i
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::add]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 47:4-50:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.add
+  (self : arithmetic.modulo.Ring) (lhs : arithmetic.modulo.RingItem)
+  (rhs : arithmetic.modulo.RingItem) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  let i ← core.U128.Insts.CoreConvertFromU64.from lhs
+  let i1 ← core.U128.Insts.CoreConvertFromU64.from rhs
+  let sum ← i + i1
+  let i2 ← core.U128.Insts.CoreConvertFromU64.from self.modulo
+  let i3 ← sum % i2
+  let i4 ← lift (UScalar.cast .U64 i3)
+  ok i4
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::neg]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 52:4-59:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.neg
+  (self : arithmetic.modulo.Ring) (item : arithmetic.modulo.RingItem) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  let value ← arithmetic.modulo.Ring.norm_item self item
+  if value = 0#u64
+  then ok 0#u64
+  else let i ← self.modulo - value
+       ok i
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 61:4-64:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.mul
+  (self : arithmetic.modulo.Ring) (lhs : arithmetic.modulo.RingItem)
+  (rhs : arithmetic.modulo.RingItem) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  let i ← core.U128.Insts.CoreConvertFromU64.from lhs
+  let i1 ← core.U128.Insts.CoreConvertFromU64.from rhs
+  let product ← i * i1
+  let i2 ← core.U128.Insts.CoreConvertFromU64.from self.modulo
+  let i3 ← product % i2
+  let i4 ← lift (UScalar.cast .U64 i3)
+  ok i4
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::{impl core::ops::function::FnOnce<(u64,), phd_core::arithmetic::modulo::RingItem> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure<A, Clause0_Error>}::call_once]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+def
+  arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem.call_once
+  {A : Type} {Clause0_Error : Type} (ModularInverseInst :
+  arithmetic.modulo.ModularInverse A Clause0_Error)
+  (c : arithmetic.modulo.Ring.mul_inverse.closure.closure A Clause0_Error)
+  (tupled_args : Std.U64) :
+  RustM arithmetic.modulo.RingItem
+  := do
+  ok tupled_args
+
+/-- Trait implementation: [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::{impl core::ops::function::FnOnce<(u64,), phd_core::arithmetic::modulo::RingItem> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure<A, Clause0_Error>}]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+@[reducible]
+def
+  arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem
+  {A : Type} {Clause0_Error : Type} (ModularInverseInst :
+  arithmetic.modulo.ModularInverse A Clause0_Error) : core.ops.function.FnOnce
+  (arithmetic.modulo.Ring.mul_inverse.closure.closure A Clause0_Error) Std.U64
+  arithmetic.modulo.RingItem := {
+  call_once :=
+    arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem.call_once
+    ModularInverseInst
+}
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::{impl core::ops::function::FnOnce<(core::option::Option<u64>,), core::option::Option<phd_core::arithmetic::modulo::RingItem>> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure<A, Clause0_Error>}::call_once]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
+def
+  arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem.call_once
+  {A : Type} {Clause0_Error : Type} (ModularInverseInst :
+  arithmetic.modulo.ModularInverse A Clause0_Error)
+  (c : arithmetic.modulo.Ring.mul_inverse.closure A Clause0_Error)
+  (tupled_args : core.option.Option Std.U64) :
+  RustM (core.option.Option arithmetic.modulo.RingItem)
+  := do
+  core.option.Option.map
+    (arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem
+    ModularInverseInst) tupled_args ()
+
+/-- Trait implementation: [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::{impl core::ops::function::FnOnce<(core::option::Option<u64>,), core::option::Option<phd_core::arithmetic::modulo::RingItem>> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure<A, Clause0_Error>}]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
+@[reducible]
+def
+  arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem
+  {A : Type} {Clause0_Error : Type} (ModularInverseInst :
+  arithmetic.modulo.ModularInverse A Clause0_Error) : core.ops.function.FnOnce
+  (arithmetic.modulo.Ring.mul_inverse.closure A Clause0_Error)
+  (core.option.Option Std.U64) (core.option.Option arithmetic.modulo.RingItem)
+  := {
+  call_once :=
+    arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem.call_once
+    ModularInverseInst
+}
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 67:4-74:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.mul_inverse
+  {A : Type} {Clause0_Error : Type} (ModularInverseInst :
+  arithmetic.modulo.ModularInverse A Clause0_Error)
+  (self : arithmetic.modulo.Ring) (item : arithmetic.modulo.RingItem)
+  (algo : A) :
+  RustM (core.result.Result (core.option.Option arithmetic.modulo.RingItem)
+    Clause0_Error)
+  := do
+  let ri ← arithmetic.modulo.Ring.norm_item self item
+  let r ← ModularInverseInst.inverse algo ri self.modulo
+  core.result.Result.map
+    (arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem
+    ModularInverseInst) r ()
 
 end phd_core

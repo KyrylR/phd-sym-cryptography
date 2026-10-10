@@ -12,6 +12,9 @@
 
       extractionRoots = [
         "phd_core::arithmetic::modulo"
+        "phd_core::arithmetic::matrix"
+        "phd_core::arithmetic::linear_system"
+        "phd_core::arithmetic::engine::ext_gcd"
       ];
       extractionArgs = pkgs.lib.escapeShellArgs (
         pkgs.lib.concatMap (root: [ "--start-from" root ]) extractionRoots

@@ -2,6 +2,7 @@
 -- [phd_core]: type definitions
 import Aeneas
 import CoreModels
+import PhdCore.Extraction.TypesExternal
 open CoreModels Aeneas
 open Aeneas.Std hiding namespace core alloc
 open RustM ControlFlow Error
@@ -21,6 +22,26 @@ set_option maxRecDepth 2048
 
 namespace phd_core
 
+/-- [phd_core::arithmetic::engine::ext_gcd::ExtGcd]
+    Source: 'crates/core/src/arithmetic/engine/ext_gcd.rs', lines 6:0-6:18
+    Visibility: public -/
+@[reducible]
+def arithmetic.engine.ext_gcd.ExtGcd := Unit
+
+/-- [phd_core::arithmetic::modulo::RingItem]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 9:0-9:25
+    Visibility: public -/
+@[reducible]
+def arithmetic.modulo.RingItem := Std.U64
+
+/-- Trait declaration: [phd_core::arithmetic::modulo::ModularInverse]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 18:0-28:1
+    Visibility: public -/
+structure arithmetic.modulo.ModularInverse (Self : Type) (Self_Error : Type)
+  where
+  inverse : Self → arithmetic.modulo.RingItem → Std.U64 → RustM
+    (core.result.Result (core.option.Option Std.U64) Self_Error)
+
 /-- [phd_core::arithmetic::errors::RingError]
     Source: 'crates/core/src/arithmetic/errors.rs', lines 5:0-7:1
     Visibility: public -/
@@ -28,14 +49,55 @@ namespace phd_core
 inductive arithmetic.errors.RingError where
 | ZeroModulo : arithmetic.errors.RingError
 
+/-- [phd_core::arithmetic::errors::MatrixError]
+    Source: 'crates/core/src/arithmetic/errors.rs', lines 20:0-23:1
+    Visibility: public -/
+@[discriminant isize]
+inductive arithmetic.errors.MatrixError where
+| ZeroRows : arithmetic.errors.MatrixError
+| UnevenRows : Std.Usize → Std.Usize → arithmetic.errors.MatrixError
+
+/-- [phd_core::arithmetic::errors::LinearSystemError]
+    Source: 'crates/core/src/arithmetic/errors.rs', lines 40:0-42:1
+    Visibility: public -/
+@[discriminant isize]
+inductive arithmetic.errors.LinearSystemError where
+| RhsLengthMismatch :
+  Std.Usize →
+  Std.Usize →
+  arithmetic.errors.LinearSystemError
+
+/-- [phd_core::arithmetic::matrix::Matrix]
+    Source: 'crates/core/src/arithmetic/matrix.rs', lines 3:0-7:1 -/
+structure arithmetic.matrix.Matrix (T : Type) where
+  rows : Std.Usize
+  cols : Std.Usize
+  entries : alloc.vec.Vec T
+
+/-- [phd_core::arithmetic::linear_system::LinearSystem]
+    Source: 'crates/core/src/arithmetic/linear_system.rs', lines 4:0-7:1 -/
+structure arithmetic.linear_system.LinearSystem (T : Type) where
+  coeffs : arithmetic.matrix.Matrix T
+  rhs_vec : alloc.vec.Vec T
+
 /-- [phd_core::arithmetic::modulo::Ring]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 5:0-7:1 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 5:0-7:1
+    Visibility: public -/
 structure arithmetic.modulo.Ring where
   modulo : Std.U64
 
-/-- [phd_core::arithmetic::modulo::RingItem]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 9:0-9:32 -/
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
 @[reducible]
-def arithmetic.modulo.RingItem := Std.U64
+def arithmetic.modulo.Ring.mul_inverse.closure (A : Type) (Clause0_Error :
+  Type) :=
+Unit
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure]
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+@[reducible]
+def arithmetic.modulo.Ring.mul_inverse.closure.closure (A : Type)
+  (Clause0_Error : Type) :=
+Unit
 
 end phd_core
