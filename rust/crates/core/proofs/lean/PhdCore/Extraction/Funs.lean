@@ -352,4 +352,106 @@ def arithmetic.modulo.Ring.solve_linear_congruence
     ok (core.result.Result.Ok (core.option.Option.Some (ri, step, g)))
   else ok (core.result.Result.Ok core.option.Option.None)
 
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::bezout_weights]: loop body 1:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 127:12-130:13
+    Visibility: public -/
+@[rust_loop_body]
+def arithmetic.modulo.Ring.bezout_weights_loop0_loop0.body
+  (gcd : Std.U64) (s : Std.U64)
+  (weights : alloc.vec.Vec arithmetic.modulo.RingItem) (index : Std.Usize) :
+  RustM (ControlFlow ((alloc.vec.Vec arithmetic.modulo.RingItem) × Std.Usize)
+    (alloc.vec.Vec arithmetic.modulo.RingItem))
+  := do
+  let i ← alloc.vec.Vec.len weights
+  if index < i
+  then
+    let ri ←
+      alloc.vec.Vec.Insts.CoreOpsIndexIndex.index
+        (core.Usize.Insts.CoreSliceIndexSliceIndexSliceT
+        arithmetic.modulo.RingItem) weights index
+    let i1 ← arithmetic.modulo.RingItem.value ri
+    let ri1 ← arithmetic.modulo.Ring.mul { modulo := gcd } i1 s
+    let (_, index_mut_back) ←
+      alloc.vec.Vec.Insts.CoreOpsIndexIndexMut.index_mut
+        (core.Usize.Insts.CoreSliceIndexSliceIndexSliceT
+        arithmetic.modulo.RingItem) weights index
+    let index1 ← index + 1#usize
+    let weights1 := index_mut_back ri1
+    ok (cont (weights1, index1))
+  else ok (done weights)
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::bezout_weights]: loop 1:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 127:12-130:13
+    Visibility: public -/
+@[rust_loop]
+def arithmetic.modulo.Ring.bezout_weights_loop0_loop0
+  (gcd : Std.U64) (weights : alloc.vec.Vec arithmetic.modulo.RingItem)
+  (s : Std.U64) (index : Std.Usize) :
+  RustM (alloc.vec.Vec arithmetic.modulo.RingItem)
+  := do
+  loop
+    (fun (weights1, index1) =>
+      arithmetic.modulo.Ring.bezout_weights_loop0_loop0.body gcd s weights1
+      index1)
+    (weights, index)
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::bezout_weights]: loop body 0:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 121:8-134:9
+    Visibility: public -/
+@[rust_loop_body]
+def arithmetic.modulo.Ring.bezout_weights_loop0.body
+  (gcd : Std.U64) (iter : core.slice.iter.Iter arithmetic.modulo.RingItem)
+  (gcd1 : Std.U64) (weights : alloc.vec.Vec arithmetic.modulo.RingItem) :
+  RustM (ControlFlow ((core.slice.iter.Iter arithmetic.modulo.RingItem) ×
+    Std.U64 × (alloc.vec.Vec arithmetic.modulo.RingItem)) (Std.U64 ×
+    (alloc.vec.Vec arithmetic.modulo.RingItem)))
+  := do
+  let (o, iter1) ←
+    core.slice.iter.Iter.Insts.CoreIterTraitsIteratorIteratorSharedAT.next iter
+  match o with
+  | core.option.Option.None => ok (done (gcd1, weights))
+  | core.option.Option.Some coefficient =>
+    let i ← arithmetic.modulo.RingItem.value coefficient
+    let i1 ← i % gcd
+    let (next_gcd, s, t) ← arithmetic.engine.ext_gcd.extended_gcd gcd1 i1
+    let i2 ← core.I128.Insts.CoreConvertFromU64.from gcd
+    let i3 ← core.num.I128.rem_euclid s i2
+    let s1 ← lift (IScalar.hcast .U64 i3)
+    let i4 ← core.num.I128.rem_euclid t i2
+    let t1 ← lift (IScalar.hcast .U64 i4)
+    let weights1 ←
+      arithmetic.modulo.Ring.bezout_weights_loop0_loop0 gcd weights s1 0#usize
+    let weights2 ← alloc.vec.Vec.push weights1 t1
+    ok (cont (iter1, next_gcd, weights2))
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::bezout_weights]: loop 0:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 121:8-134:9
+    Visibility: public -/
+@[rust_loop]
+def arithmetic.modulo.Ring.bezout_weights_loop0
+  (iter : core.slice.iter.Iter arithmetic.modulo.RingItem) (gcd : Std.U64)
+  (gcd1 : Std.U64) (weights : alloc.vec.Vec arithmetic.modulo.RingItem) :
+  RustM (Std.U64 × (alloc.vec.Vec arithmetic.modulo.RingItem))
+  := do
+  loop
+    (fun (iter1, gcd2, weights1) =>
+      arithmetic.modulo.Ring.bezout_weights_loop0.body gcd iter1 gcd2 weights1)
+    (iter, gcd1, weights)
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::bezout_weights]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 117:4-137:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.bezout_weights
+  (self : arithmetic.modulo.Ring)
+  (coefficients : Slice arithmetic.modulo.RingItem) :
+  RustM (Std.U64 × (alloc.vec.Vec arithmetic.modulo.RingItem))
+  := do
+  let i ← core.slice.Slice.len coefficients
+  let weights ← alloc.vec.Vec.with_capacity arithmetic.modulo.RingItem i
+  let iter ←
+    core.SharedASlice.Insts.CoreIterTraitsCollectIntoIteratorSharedATIter.into_iter
+      coefficients
+  arithmetic.modulo.Ring.bezout_weights_loop0 iter self.modulo self.modulo
+    weights
+
 end phd_core

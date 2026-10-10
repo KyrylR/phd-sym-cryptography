@@ -104,11 +104,68 @@ impl Ring {
 
         Ok(Some((self.new_item(first as u64), step, g)))
     }
+
+    /// For a_1, ..., a_n (mod m)
+    ///
+    /// Returns:
+    ///
+    /// (gcd, weights)
+    ///     gcd = gcd(m, a_1, ..., a_n).
+    ///     `a_1 * weights[0] + ... + a_n * weights[n - 1] = gcd (mod m)`.
+    ///     Each weight is normalized to `[0, m)`.
+    ///     Empty coefficients return (m, an empty vector).
+    pub fn bezout_weights(&self, coefficients: &[RingItem]) -> (u64, Vec<RingItem>) {
+        let mut gcd = self.modulo;
+        let mut weights: Vec<RingItem> = Vec::with_capacity(coefficients.len());
+
+        for coefficient in coefficients {
+            let (next_gcd, s, t) = extended_gcd(gcd, coefficient.value() % self.modulo);
+            let s = s.rem_euclid(i128::from(self.modulo)) as u64;
+            let t = t.rem_euclid(i128::from(self.modulo)) as u64;
+
+            let mut index = 0;
+            while index < weights.len() {
+                weights[index] = self.mul(RingItem(weights[index].value()), RingItem(s));
+                index += 1;
+            }
+
+            weights.push(RingItem(t));
+            gcd = next_gcd;
+        }
+
+        (gcd, weights)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::arithmetic::modulo::{Ring, RingItem};
+
+    #[test]
+    fn bezout_weights() {
+        let cases: &[(&[u64], u64, (u64, &[u64]))] = &[
+            (&[], 6, (6, &[])),
+            (&[0, 0], 6, (6, &[0, 0])),
+            (&[4], 6, (2, &[5])),
+            (&[4, 3], 6, (1, &[1, 1])),
+            (&[4, 2], 6, (2, &[0, 1])),
+            (&[10, 9], 6, (1, &[1, 1])),
+            (&[4, 3], 1, (1, &[0, 0])),
+            (&[2], u64::MAX, (1, &[1_u64 << 63])),
+        ];
+
+        for &(coefficients, modulo, expected) in cases {
+            let ring = Ring::new(modulo).unwrap();
+            let items: Vec<_> = coefficients.iter().map(|&value| RingItem(value)).collect();
+            let (gcd, weights) = ring.bezout_weights(&items);
+            let weights: Vec<_> = weights.iter().map(RingItem::value).collect();
+            assert_eq!(
+                expected,
+                (gcd, weights.as_slice()),
+                "coefficients: {coefficients:?}, modulus: {modulo}"
+            );
+        }
+    }
 
     #[test]
     fn solve_single() {
