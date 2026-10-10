@@ -31,7 +31,7 @@ impl ModularInverse for ExtGcd {
 /// Cryptography*, Algorithm 2.107, p. 67.
 /// [Book DOI](https://doi.org/10.1201/9780429466335) ·
 /// [Authors' chapter PDF](https://cacr.uwaterloo.ca/hac/about/chap2.pdf#page=20).
-fn extended_gcd(mut a: u64, mut b: u64) -> (u64, i128, i128) {
+pub(crate) fn extended_gcd(mut a: u64, mut b: u64) -> (u64, i128, i128) {
     if b == 0 {
         return (a, 1, 0);
     }

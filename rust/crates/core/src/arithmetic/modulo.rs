@@ -1,6 +1,7 @@
 //! TBD
 
 use super::errors::RingError;
+use crate::arithmetic::engine::ext_gcd::extended_gcd;
 
 pub struct Ring {
     modulo: u64,
@@ -71,5 +72,64 @@ impl Ring {
     ) -> Result<Option<RingItem>, A::Error> {
         algo.inverse(self.norm_item(item), self.modulo)
             .map(|inverse| inverse.map(|value| RingItem(value)))
+    }
+
+    /// For ax = b (mod m)
+    ///
+    /// Returns:
+    ///
+    /// None
+    ///     No solution exists.
+    ///
+    /// Some((first, step, count))
+    ///     All solutions are first + k * step,
+    ///     for k = 0, 1, ..., count - 1.
+    pub fn solve_linear_congruence(
+        &self,
+        mut a: RingItem,
+        mut b: RingItem,
+    ) -> Result<Option<(RingItem, u64, u64)>, RingError> {
+        a = self.norm_item(a);
+        b = self.norm_item(b);
+
+        let (g, _, s) = extended_gcd(self.modulo, a.0);
+        if !b.0.is_multiple_of(g) {
+            return Ok(None);
+        }
+
+        let step = self.modulo / g;
+
+        let s_normalized = s.rem_euclid(i128::from(step)) as u64;
+        let first = (u128::from(s_normalized) * u128::from(b.0 / g)) % u128::from(step);
+
+        Ok(Some((self.new_item(first as u64), step, g)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::arithmetic::modulo::{Ring, RingItem};
+
+    #[test]
+    fn solve_single() {
+        let cases = [
+            (4, 2, 6, Some((2, 3, 2))),
+            (17, 1, 43, Some((38, 43, 1))),
+            (4, 1, 6, None),
+            (0, 0, 6, Some((0, 1, 6))),
+            (0, 1, 6, None),
+            (0, 0, 1, Some((0, 1, 1))),
+            (10, 8, 6, Some((2, 3, 2))),
+            (2, u64::MAX - 1, u64::MAX, Some((u64::MAX / 2, u64::MAX, 1))),
+        ];
+
+        for (a, b, modulo, solution) in cases {
+            let ring = Ring::new(modulo).unwrap();
+            let actual = ring
+                .solve_linear_congruence(RingItem(a), RingItem(b))
+                .unwrap()
+                .map(|(first, step, count)| (first.value(), step, count));
+            assert_eq!(solution, actual, "a: {a}, b: {b}, modulus: {modulo}");
+        }
     }
 }

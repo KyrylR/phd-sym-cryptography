@@ -29,13 +29,13 @@ namespace phd_core
 def arithmetic.engine.ext_gcd.ExtGcd := Unit
 
 /-- [phd_core::arithmetic::modulo::RingItem]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 9:0-9:25
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 10:0-10:25
     Visibility: public -/
 @[reducible]
 def arithmetic.modulo.RingItem := Std.U64
 
 /-- Trait declaration: [phd_core::arithmetic::modulo::ModularInverse]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 18:0-28:1
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 19:0-29:1
     Visibility: public -/
 structure arithmetic.modulo.ModularInverse (Self : Type) (Self_Error : Type)
   where
@@ -81,20 +81,20 @@ structure arithmetic.linear_system.LinearSystem (T : Type) where
   rhs_vec : alloc.vec.Vec T
 
 /-- [phd_core::arithmetic::modulo::Ring]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 5:0-7:1
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 6:0-8:1
     Visibility: public -/
 structure arithmetic.modulo.Ring where
   modulo : Std.U64
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:17-74:63 -/
 @[reducible]
 def arithmetic.modulo.Ring.mul_inverse.closure (A : Type) (Clause0_Error :
   Type) :=
 Unit
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:39-74:62 -/
 @[reducible]
 def arithmetic.modulo.Ring.mul_inverse.closure.closure (A : Type)
   (Clause0_Error : Type) :=

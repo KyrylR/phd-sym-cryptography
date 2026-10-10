@@ -27,7 +27,7 @@ noncomputable section
 namespace phd_core
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::RingItem}::value]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 12:4-14:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 13:4-15:5
     Visibility: public -/
 def arithmetic.modulo.RingItem.value
   (self : arithmetic.modulo.RingItem) : RustM Std.U64 := do
@@ -175,7 +175,7 @@ def arithmetic.matrix.Matrix.impl.cols
   ok self.cols
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::new]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 31:4-37:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 32:4-38:5
     Visibility: public -/
 def arithmetic.modulo.Ring.new
   (modulo : Std.U64) :
@@ -186,7 +186,7 @@ def arithmetic.modulo.Ring.new
   else ok (core.result.Result.Ok { modulo })
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::new_item]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 39:4-41:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 40:4-42:5
     Visibility: public -/
 def arithmetic.modulo.Ring.new_item
   (self : arithmetic.modulo.Ring) (value : Std.U64) :
@@ -196,7 +196,7 @@ def arithmetic.modulo.Ring.new_item
   ok i
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::norm_item]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 43:4-45:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 44:4-46:5
     Visibility: public -/
 def arithmetic.modulo.Ring.norm_item
   (self : arithmetic.modulo.Ring) (value : arithmetic.modulo.RingItem) :
@@ -206,7 +206,7 @@ def arithmetic.modulo.Ring.norm_item
   ok i
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::add]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 47:4-50:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 48:4-51:5
     Visibility: public -/
 def arithmetic.modulo.Ring.add
   (self : arithmetic.modulo.Ring) (lhs : arithmetic.modulo.RingItem)
@@ -222,7 +222,7 @@ def arithmetic.modulo.Ring.add
   ok i4
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::neg]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 52:4-59:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 53:4-60:5
     Visibility: public -/
 def arithmetic.modulo.Ring.neg
   (self : arithmetic.modulo.Ring) (item : arithmetic.modulo.RingItem) :
@@ -235,7 +235,7 @@ def arithmetic.modulo.Ring.neg
        ok i
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 61:4-64:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 62:4-65:5
     Visibility: public -/
 def arithmetic.modulo.Ring.mul
   (self : arithmetic.modulo.Ring) (lhs : arithmetic.modulo.RingItem)
@@ -251,7 +251,7 @@ def arithmetic.modulo.Ring.mul
   ok i4
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::{impl core::ops::function::FnOnce<(u64,), phd_core::arithmetic::modulo::RingItem> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure<A, Clause0_Error>}::call_once]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:39-74:62 -/
 def
   arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem.call_once
   {A : Type} {Clause0_Error : Type} (ModularInverseInst :
@@ -263,7 +263,7 @@ def
   ok tupled_args
 
 /-- Trait implementation: [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::{impl core::ops::function::FnOnce<(u64,), phd_core::arithmetic::modulo::RingItem> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure::closure<A, Clause0_Error>}]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:39-73:62 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:39-74:62 -/
 @[reducible]
 def
   arithmetic.modulo.Ring.mul_inverse.closure.closure.Insts.CoreOpsFunctionFnOnceTupleU64RingItem
@@ -277,7 +277,7 @@ def
 }
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::{impl core::ops::function::FnOnce<(core::option::Option<u64>,), core::option::Option<phd_core::arithmetic::modulo::RingItem>> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure<A, Clause0_Error>}::call_once]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:17-74:63 -/
 def
   arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem.call_once
   {A : Type} {Clause0_Error : Type} (ModularInverseInst :
@@ -291,7 +291,7 @@ def
     ModularInverseInst) tupled_args ()
 
 /-- Trait implementation: [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::{impl core::ops::function::FnOnce<(core::option::Option<u64>,), core::option::Option<phd_core::arithmetic::modulo::RingItem>> for phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse::closure<A, Clause0_Error>}]
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 73:17-73:63 -/
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 74:17-74:63 -/
 @[reducible]
 def
   arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem
@@ -306,7 +306,7 @@ def
 }
 
 /-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::mul_inverse]:
-    Source: 'crates/core/src/arithmetic/modulo.rs', lines 67:4-74:5
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 68:4-75:5
     Visibility: public -/
 def arithmetic.modulo.Ring.mul_inverse
   {A : Type} {Clause0_Error : Type} (ModularInverseInst :
@@ -321,5 +321,35 @@ def arithmetic.modulo.Ring.mul_inverse
   core.result.Result.map
     (arithmetic.modulo.Ring.mul_inverse.closure.Insts.CoreOpsFunctionFnOnceTupleOptionU64OptionRingItem
     ModularInverseInst) r ()
+
+/-- [phd_core::arithmetic::modulo::{phd_core::arithmetic::modulo::Ring}::solve_linear_congruence]:
+    Source: 'crates/core/src/arithmetic/modulo.rs', lines 87:4-106:5
+    Visibility: public -/
+def arithmetic.modulo.Ring.solve_linear_congruence
+  (self : arithmetic.modulo.Ring) (a : arithmetic.modulo.RingItem)
+  (b : arithmetic.modulo.RingItem) :
+  RustM (core.result.Result (core.option.Option (arithmetic.modulo.RingItem ×
+    Std.U64 × Std.U64)) arithmetic.errors.RingError)
+  := do
+  let a1 ← arithmetic.modulo.Ring.norm_item self a
+  let b1 ← arithmetic.modulo.Ring.norm_item self b
+  let (g, _, s) ← arithmetic.engine.ext_gcd.extended_gcd self.modulo a1
+  let b2 ← core.num.U64.is_multiple_of b1 g
+  if b2
+  then
+    let step ← self.modulo / g
+    let i ← core.I128.Insts.CoreConvertFromU64.from step
+    let i1 ← core.num.I128.rem_euclid s i
+    let s_normalized ← lift (IScalar.hcast .U64 i1)
+    let i2 ← core.U128.Insts.CoreConvertFromU64.from s_normalized
+    let i3 ← b1 / g
+    let i4 ← core.U128.Insts.CoreConvertFromU64.from i3
+    let i5 ← i2 * i4
+    let i6 ← core.U128.Insts.CoreConvertFromU64.from step
+    let first ← i5 % i6
+    let i7 ← lift (UScalar.cast .U64 first)
+    let ri ← arithmetic.modulo.Ring.new_item self i7
+    ok (core.result.Result.Ok (core.option.Option.Some (ri, step, g)))
+  else ok (core.result.Result.Ok core.option.Option.None)
 
 end phd_core
